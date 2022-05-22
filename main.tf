@@ -21,7 +21,7 @@ resource "aws_instance" "terraform-demo" {
     user_data = <<-EOF
                 #!/bin/bash
                 echo "Hello, World" > index.html
-                nohup busybox httpd -f -p 8080 &
+                nohup busybox httpd -f -p ${var.port_number} &
                 EOF
 
     tags = {
@@ -33,8 +33,8 @@ resource "aws_instance" "terraform-demo" {
 resource "aws_security_group" "instance" {
   name = var.security_group_name
   ingress {
-    from_port   = 8080
-    to_port     = 8080
+    from_port   = var.port_number
+    to_port     = var.port_number
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -46,8 +46,13 @@ variable "security_group_name" {
   default     = "terraform-demo-instance"
 }
 
+variable "port_number" {
+  description = "The port number where the web server runs on"
+  type = number
+  default = 8080
+}
+
 output "public_ip" {
   value = aws_instance.terraform-demo.public_ip
   description = "The public IP of the instance, use curl http://<public_ip>:8000 to test if the web server works"
-  
 }
